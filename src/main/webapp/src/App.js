@@ -2,6 +2,22 @@ import './App.css';
 import {useEffect, useState} from "react";
 import produce from "immer";
 
+import * as React from 'react';
+import Box from '@mui/material/Box';
+import Paper from '@mui/material/Paper';
+import Stack from '@mui/material/Stack';
+import {styled} from '@mui/material/styles';
+import Button from '@mui/material/Button';
+import TextField from '@mui/material/TextField';
+
+const Item = styled(Paper)(({theme}) => ({
+    backgroundColor: theme.palette.mode === 'dark' ? '#1A2027' : '#fff',
+    ...theme.typography.body2,
+    padding: theme.spacing(1),
+    textAlign: 'left',
+    color: theme.palette.text.secondary,
+}));
+
 function App() {
     // Screen
     const [mode, setMode] = useState(null);
@@ -114,7 +130,7 @@ function App() {
             setMode(null);
         }}></Update>
 
-        memoDeleteButton = <input type="button" value="Delete" onClick={() => {
+        memoDeleteButton = <Button variant="contained" type="submit" onClick={() => {
             const memo = {memo: orgMemo};
 
             // Remove
@@ -143,37 +159,41 @@ function App() {
                     }
                 )
             setMode(null);
-        }}/>
+        }}>Delete</Button>
     }
 
     return (
         <div className="App">
-            <Head></Head>
-            <ul>
-                <li>
-                    <a href="create" onClick={event => {
-                        event.preventDefault();
-                        setMode('CREATE');
-                    }}>Create Memo</a>
-                </li>
-            </ul>
-
-            {memoDetailBody}
-
-            {memoDeleteButton}
-
-            <Memos memos={memos} onClick={(_memo) => {
-                setOrgMemo(_memo);
-                setMode('UPDATE');
-            }}></Memos>
+            <Box sx={{width: '100%'}}>
+                <Stack spacing={2}>
+                    <Item>
+                        <Head></Head>
+                    </Item>
+                    <Item>
+                        <a href="create" onClick={event => {
+                            event.preventDefault();
+                            setMode('CREATE');
+                        }}>Create Memo</a>
+                        {memoDetailBody}
+                        {memoDeleteButton}
+                    </Item>
+                    <Item>
+                        <Memos memos={memos} onClick={(_memo) => {
+                            setOrgMemo(_memo);
+                            setMode('UPDATE');
+                        }}></Memos>
+                    </Item>
+                </Stack>
+            </Box>
         </div>
+
     );
 }
 
 function Head() {
     return (
         <header>
-            <h1>Memo App</h1>
+            <h1>React Memo App on Quarkus</h1>
         </header>
     );
 }
@@ -212,8 +232,9 @@ function Create(props) {
                 if (newMemoValue !== '')
                     props.onCreate(newMemoValue);
             }}>
-                <p><input type="text" name="memo" placeholder="memo..." onMouseEnter={event => event.target}/></p>
-                <p><input type="submit" value="Create"/></p>
+                <TextField id="outlined-basic" label="Memo" variant="outlined" name="memo" size="40"
+                           onMouseEnter={event => event.target}/><p/>
+                <Button variant="contained" type="submit">Create</Button>
             </form>
         </article>
     );
@@ -230,9 +251,10 @@ function Update(props) {
                 if (newMemoValue !== '')
                     props.onUpdate(newMemoValue);
             }}>
-                <p><input type="text" name="memo" placeholder="memo..." size="40" value={orgMemo}
-                          onChange={event => setOrgMemo(event.target.value)} onMouseEnter={event => event.target}/></p>
-                <p><input type="submit" value="Update"/></p>
+                <TextField id="outlined-basic" label="Memo" variant="outlined" name="memo" size="40"
+                           value={orgMemo}
+                           onChange={event => setOrgMemo(event.target.value)} onMouseEnter={event => event.target}/><p/>
+                <Button variant="contained" type="submit">Update</Button>
             </form>
 
         </article>

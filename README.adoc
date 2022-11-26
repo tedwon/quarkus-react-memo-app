@@ -76,6 +76,17 @@ http://localhost:8080/
 
 * https://youtube.com/playlist?list=PLuHgQVnccGMCOGstdDZvH41x0Vtvwyxu7[React 2022 개정판 - YouTube]
 * https://quarkus.io/blog/gui-react-patternfly/[Adding Eyecandy to your Quarkus App with React and Patternfly]
+* https://stackblitz.com/[StackBlitz]
+
+==== React MUI Components
+* https://mui.com/
+* https://youtu.be/or3np70c7zU[React UI 라이브러리 - MUI (Material-ui)]
+
+===== Install MUI
+[source,bash,options="nowrap"]
+----
+npm install @mui/material @emotion/react @emotion/styled
+----
 
 ==== Add Immer.js | React
 
