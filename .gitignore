@@ -41,6 +41,7 @@ nb-configuration.xml
 
 # dependencies
 src/main/webapp/node_modules
+src/main/webapp/build
 /.pnp
 .pnp.js
 
