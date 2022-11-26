@@ -19,7 +19,7 @@ https://github.com/tedwon/quarkus-react-memo-app
 https://quarkus.io/get-started/
 
 
-== Run Quarkus App
+== Run the Quarkus App in Dev mode
 [source,bash,options="nowrap"]
 ----
 ./mvnw compile quarkus:dev
@@ -37,6 +37,13 @@ https://reactjs.org/docs/create-a-new-react-app.html
 ----
 npx create-react-app webapp
 cd webapp
+----
+
+== Run the React App in Dev mode
+
+[source,bash,options="nowrap"]
+----
+npm install
 npm start
 ----
 
