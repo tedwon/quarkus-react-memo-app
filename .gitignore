@@ -40,7 +40,7 @@ nb-configuration.xml
 .env
 
 # dependencies
-webapp/node_modules
+src/webapp/node_modules
 /.pnp
 .pnp.js
 
