@@ -9,7 +9,7 @@
 :idseparator:   -
 
 
-= https://github.com/tedwon/react-memo-app[Simple CRUD Quarkus React Memo App]
+= https://github.com/tedwon/quarkus-react-memo-app[Simple CRUD Quarkus React Memo App]
 
 https://github.com/tedwon/quarkus-react-memo-app
 
@@ -55,8 +55,18 @@ https://immerjs.github.io/immer/example-setstate/
 npm install immer
 ----
 
-== Productisation Build
+== Production Build
+
+https://quarkus.io/blog/gui-react-patternfly/#step-5-prepare-our-project-for-production-build[Step 5 - Prepare our Project for Production Build | Adding Eyecandy to your Quarkus App with React and Patternfly]
+
+[source,bash,options="nowrap"]
+----
+mvn clean package
+
+java -jar target/quarkus-app/quarkus-run.jar
+----
 
 == References
 
 * https://youtube.com/playlist?list=PLuHgQVnccGMCOGstdDZvH41x0Vtvwyxu7[React 2022 개정판 - YouTube]
+* https://quarkus.io/blog/gui-react-patternfly/[Adding Eyecandy to your Quarkus App with React and Patternfly]
