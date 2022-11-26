@@ -43,6 +43,8 @@ cd webapp
 
 link:src/main/webapp/README.md[]
 
+link:src/main/webapp/src/App.js[]
+
 [source,bash,options="nowrap"]
 ----
 npm install
