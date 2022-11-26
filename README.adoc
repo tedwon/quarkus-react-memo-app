@@ -51,17 +51,6 @@ npm start
 
 http://localhost:3000/
 
-== Add Immer.js
-
-https://immerjs.github.io/immer/
-
-https://immerjs.github.io/immer/example-setstate/
-
-[source,bash,options="nowrap"]
-----
-npm install immer
-----
-
 == Production Build
 
 https://quarkus.io/blog/gui-react-patternfly/#step-5-prepare-our-project-for-production-build[Step 5 - Prepare our Project for Production Build | Adding Eyecandy to your Quarkus App with React and Patternfly]
@@ -75,5 +64,17 @@ java -jar target/quarkus-app/quarkus-run.jar
 
 == References
 
+=== React References
+
 * https://youtube.com/playlist?list=PLuHgQVnccGMCOGstdDZvH41x0Vtvwyxu7[React 2022 개정판 - YouTube]
 * https://quarkus.io/blog/gui-react-patternfly/[Adding Eyecandy to your Quarkus App with React and Patternfly]
+
+=== Add Immer.js | React
+
+* https://immerjs.github.io/immer/
+** https://immerjs.github.io/immer/example-setstate/
+
+[source,bash,options="nowrap"]
+----
+npm install immer
+----
