@@ -18,7 +18,6 @@ function App() {
             .then(res => res.json())
             .then(result => {
                     setMemos(result);
-                    // console.log(result);
                 },
                 // Note: it's important to handle errors here
                 // instead of a catch() block so that we don't swallow
@@ -222,7 +221,6 @@ function Create(props) {
 
 function Update(props) {
     const [orgMemo, setOrgMemo] = useState(props.orgMemo);
-
     return (
         <article>
             <h2>Update Memo</h2>
