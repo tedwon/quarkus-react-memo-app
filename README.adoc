@@ -41,6 +41,8 @@ cd webapp
 
 == Run the React App in Dev mode
 
+link:src/main/webapp/README.md[]
+
 [source,bash,options="nowrap"]
 ----
 npm install
