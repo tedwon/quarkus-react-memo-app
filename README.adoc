@@ -1,1 +1,43 @@
-# quarkus-react-memo-app
+:author:             Ted Won
+:email:               iamtedwon@gmail.com
+:toc:                   left
+:toclevels:         5
+:sectnums:
+:sectnumlevels: 5
+:icons:                font
+:idprefix:
+:idseparator:   -
+
+
+
+
+= https://github.com/tedwon/react-memo-app[Simple CRUD Quarkus React Memo App]
+
+https://github.com/tedwon/quarkus-react-memo-app
+
+== Create a Quarkus Project
+
+https://quarkus.io/get-started/
+
+
+== Create a React App
+
+https://reactjs.org/docs/create-a-new-react-app.html
+
+[source,bash,options="nowrap"]
+----
+npx create-react-app webapp
+cd webapp
+npm start
+----
+
+== Add Immer.js
+
+https://immerjs.github.io/immer/
+
+https://immerjs.github.io/immer/example-setstate/
+
+[source,bash,options="nowrap"]
+----
+npm install immer
+----
