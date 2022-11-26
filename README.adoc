@@ -9,16 +9,25 @@
 :idseparator:   -
 
 
-
-
 = https://github.com/tedwon/react-memo-app[Simple CRUD Quarkus React Memo App]
 
 https://github.com/tedwon/quarkus-react-memo-app
+
 
 == Create a Quarkus Project
 
 https://quarkus.io/get-started/
 
+
+== Run Quarkus App
+[source,bash,options="nowrap"]
+----
+./mvnw compile quarkus:dev
+
+or
+
+quarkus dev
+----
 
 == Create a React App
 
@@ -31,6 +40,10 @@ cd webapp
 npm start
 ----
 
+== Open App
+
+http://localhost:3000/
+
 == Add Immer.js
 
 https://immerjs.github.io/immer/
@@ -41,3 +54,9 @@ https://immerjs.github.io/immer/example-setstate/
 ----
 npm install immer
 ----
+
+== Productisation Build
+
+== References
+
+* https://youtube.com/playlist?list=PLuHgQVnccGMCOGstdDZvH41x0Vtvwyxu7[React 2022 개정판 - YouTube]

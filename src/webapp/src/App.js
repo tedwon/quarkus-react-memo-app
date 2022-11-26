@@ -38,6 +38,7 @@ function App() {
     if (mode === 'CREATE') {
         memoDetailBody = <Create onCreate={newMemoValue => {
             const _newMemo = {memo: newMemoValue};
+            const copyMemos = [...memos];
             const requestOptions = {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
@@ -46,13 +47,16 @@ function App() {
             fetch("/memo", requestOptions)
                 .then(res => res.json())
                 .then(
-                    (result) => {
-                        setMemos(result);
+                    result => {
+                        if (result) {
+                            copyMemos.push(_newMemo);
+                            setMemos(copyMemos);
+                        }
                     },
                     // Note: it's important to handle errors here
                     // instead of a catch() block so that we don't swallow
                     // exceptions from actual bugs in components.
-                    (error) => {
+                    error => {
                         console.log(error);
                     }
                 )
@@ -60,12 +64,6 @@ function App() {
         }}></Create>
     } else if (mode === 'UPDATE') {
         memoDetailBody = <Update orgMemo={orgMemo} onUpdate={newMemoValue => {
-
-            // Check if changed
-            if (orgMemo === newMemoValue) {
-                console.log('NoChanged')
-            }
-
             const memo = {memo: orgMemo};
             const _newMemo = {memo: newMemoValue};
 
@@ -88,9 +86,16 @@ function App() {
                         fetch("/memo", requestOptions)
                             .then(res => res.json())
                             .then(
-                                (result) => {
-                                    console.log(result);
-                                    setMemos(result);
+                                () => {
+                                    // Use Immer.js
+                                    setMemos(produce(memos, draft => {
+                                        for (let i = 0; i < memos.length; i++) {
+                                            if (draft[i].memo === orgMemo) {
+                                                draft[i] = _newMemo;
+                                                break;
+                                            }
+                                        }
+                                    }));
                                 },
                                 // Note: it's important to handle errors here
                                 // instead of a catch() block so that we don't swallow
@@ -123,7 +128,13 @@ function App() {
                 .then(res => res.json())
                 .then(
                     () => {
-                        console.log('deleted')
+                        setMemos(produce([], draft => {
+                            for (let i = 0; i < memos.length; i++) {
+                                if (memos[i].memo !== orgMemo) {
+                                    draft.push(memos[i])
+                                }
+                            }
+                        }));
                     },
                     // Note: it's important to handle errors here
                     // instead of a catch() block so that we don't swallow
@@ -132,13 +143,6 @@ function App() {
                         console.log(error);
                     }
                 )
-            setMemos(produce([], draft => {
-                for (let i = 0; i < memos.length; i++) {
-                    if (memos[i].memo !== orgMemo) {
-                        draft.push(memos[i])
-                    }
-                }
-            }));
             setMode(null);
         }}/>
     }
