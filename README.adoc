@@ -47,11 +47,11 @@ npm install
 npm start
 ----
 
-== Open App
+== Open App in Dev mode
 
 http://localhost:3000/
 
-== Production Build
+=== Production Build
 
 https://quarkus.io/blog/gui-react-patternfly/#step-5-prepare-our-project-for-production-build[Step 5 - Prepare our Project for Production Build | Adding Eyecandy to your Quarkus App with React and Patternfly]
 
@@ -61,6 +61,11 @@ mvn clean package
 
 java -jar target/quarkus-app/quarkus-run.jar
 ----
+
+=== Open App in Prod mode
+
+http://localhost:8080/
+
 
 == References
 
