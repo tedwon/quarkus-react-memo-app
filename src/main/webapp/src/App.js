@@ -256,6 +256,7 @@ function Update(props) {
                            onChange={event => setOrgMemo(event.target.value)} onMouseEnter={event => event.target}/><p/>
                 <Button variant="contained" type="submit">Update</Button>
             </form>
+            <p/>
 
         </article>
     );
