@@ -1,14 +1,19 @@
 import './App.css';
 import {useEffect, useState} from "react";
 import produce from "immer";
-
-import * as React from 'react';
 import Box from '@mui/material/Box';
-import Paper from '@mui/material/Paper';
 import Stack from '@mui/material/Stack';
 import {styled} from '@mui/material/styles';
 import Button from '@mui/material/Button';
 import TextField from '@mui/material/TextField';
+import Container from '@mui/material/Container';
+import Table from '@mui/material/Table';
+import TableBody from '@mui/material/TableBody';
+import TableCell from '@mui/material/TableCell';
+import TableContainer from '@mui/material/TableContainer';
+import TableHead from '@mui/material/TableHead';
+import TableRow from '@mui/material/TableRow';
+import Paper from '@mui/material/Paper';
 
 const Item = styled(Paper)(({theme}) => ({
     backgroundColor: theme.palette.mode === 'dark' ? '#1A2027' : '#fff',
@@ -19,8 +24,21 @@ const Item = styled(Paper)(({theme}) => ({
 }));
 
 function App() {
+
+    function createData(name, calories, fat, carbs, protein) {
+        return {name, calories, fat, carbs, protein};
+    }
+
+    const rows = [
+        createData('Frozen yoghurt', 159, 6.0, 24, 4.0),
+        createData('Ice cream sandwich', 237, 9.0, 37, 4.3),
+        createData('Eclair', 262, 16.0, 24, 6.0),
+        createData('Cupcake', 305, 3.7, 67, 4.3),
+        createData('Gingerbread', 356, 16.0, 49, 3.9),
+    ];
+
     // Screen
-    const [mode, setMode] = useState(null);
+    const [mode, setMode] = useState('CREATE');
 
     // Data
     const [memos, setMemos] = useState([]);
@@ -30,7 +48,7 @@ function App() {
     // similar to componentDidMount()
     // https://reactjs.org/docs/faq-ajax.html
     useEffect(() => {
-        fetch("/memo")
+        fetch("http://localhost:8080/memo")
             .then(res => res.json())
             .then(result => {
                     setMemos(result);
@@ -48,9 +66,10 @@ function App() {
     // Original Memo
     const [orgMemo, setOrgMemo] = useState(null);
 
-    let memoDetailBody, memoDeleteButton = null;
+    let createMenu, memoDetailBody, memoDeleteButton = null;
 
     if (mode === 'CREATE') {
+        createMenu = null;
         memoDetailBody = <Create onCreate={newMemoValue => {
             const _newMemo = {memo: newMemoValue};
             const copyMemos = [...memos];
@@ -59,7 +78,7 @@ function App() {
                 headers: {'Content-Type': 'application/json'},
                 body: JSON.stringify(_newMemo)
             };
-            fetch("/memo", requestOptions)
+            fetch("http://localhost:8080/memo", requestOptions)
                 .then(res => res.json())
                 .then(
                     result => {
@@ -75,9 +94,13 @@ function App() {
                         console.log(error);
                     }
                 )
-            setMode(null);
+            setMode('CREATE');
         }}></Create>
     } else if (mode === 'UPDATE') {
+        createMenu = <Button variant="outlined" type="submit" onClick={event => {
+            event.preventDefault();
+            setMode('CREATE');
+        }}>Create Memo</Button>
         memoDetailBody = <Update orgMemo={orgMemo} onUpdate={newMemoValue => {
             const memo = {memo: orgMemo};
             const _newMemo = {memo: newMemoValue};
@@ -88,7 +111,7 @@ function App() {
                 headers: {'Content-Type': 'application/json'},
                 body: JSON.stringify(memo)
             };
-            fetch("/memo", deleteRequestOptions)
+            fetch("http://localhost:8080/memo", deleteRequestOptions)
                 .then(res => res.json())
                 .then(
                     () => {
@@ -98,7 +121,7 @@ function App() {
                             headers: {'Content-Type': 'application/json'},
                             body: JSON.stringify(_newMemo)
                         };
-                        fetch("/memo", requestOptions)
+                        fetch("http://localhost:8080/memo", requestOptions)
                             .then(res => res.json())
                             .then(
                                 () => {
@@ -127,65 +150,61 @@ function App() {
                         console.log(error);
                     }
                 )
-            setMode(null);
+            setMode('CREATE');
         }}></Update>
+        memoDeleteButton = (
+            <Button variant="contained" type="submit" onClick={() => {
+                const memo = {memo: orgMemo};
 
-        memoDeleteButton = <Button variant="contained" type="submit" onClick={() => {
-            const memo = {memo: orgMemo};
-
-            // Remove
-            const deleteRequestOptions = {
-                method: 'DELETE',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify(memo)
-            };
-            fetch("/memo", deleteRequestOptions)
-                .then(res => res.json())
-                .then(
-                    () => {
-                        setMemos(produce([], draft => {
-                            for (let i = 0; i < memos.length; i++) {
-                                if (memos[i].memo !== orgMemo) {
-                                    draft.push(memos[i])
+                // Remove
+                const deleteRequestOptions = {
+                    method: 'DELETE',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify(memo)
+                };
+                fetch("http://localhost:8080/memo", deleteRequestOptions)
+                    .then(res => res.json())
+                    .then(
+                        () => {
+                            setMemos(produce([], draft => {
+                                for (let i = 0; i < memos.length; i++) {
+                                    if (memos[i].memo !== orgMemo) {
+                                        draft.push(memos[i])
+                                    }
                                 }
-                            }
-                        }));
-                    },
-                    // Note: it's important to handle errors here
-                    // instead of a catch() block so that we don't swallow
-                    // exceptions from actual bugs in components.
-                    (error) => {
-                        console.log(error);
-                    }
-                )
-            setMode(null);
-        }}>Delete</Button>
+                            }));
+                        },
+                        // Note: it's important to handle errors here
+                        // instead of a catch() block so that we don't swallow
+                        // exceptions from actual bugs in components.
+                        (error) => {
+                            console.log(error);
+                        }
+                    )
+                setMode('CREATE');
+            }}>Delete</Button>
+        );
     }
 
     return (
-        <div className="App">
+        <Container fixed>
             <Box sx={{width: '100%'}}>
                 <Stack spacing={2}>
                     <Item>
                         <Head></Head>
-                    </Item>
-                    <Item>
-                        <a href="create" onClick={event => {
-                            event.preventDefault();
-                            setMode('CREATE');
-                        }}>Create Memo</a>
+                        {createMenu}
                         {memoDetailBody}
                         {memoDeleteButton}
                     </Item>
                     <Item>
-                        <Memos memos={memos} onClick={(_memo) => {
+                        <MemoList memos={memos} onClick={(_memo) => {
                             setOrgMemo(_memo);
                             setMode('UPDATE');
-                        }}></Memos>
+                        }}></MemoList>
                     </Item>
                 </Stack>
             </Box>
-        </div>
+        </Container>
 
     );
 }
@@ -198,26 +217,34 @@ function Head() {
     );
 }
 
-function Memos(props) {
-    const rows = [];
-    for (let i = 0; i < props.memos.length; i++) {
-        const memo = props.memos[i].memo;
-        rows.push(
-            <tr key={i}>
-                <td className="App-table" onClick={() => {
-                    props.onClick(memo);
-                }}>{memo}</td>
-            </tr>
-        );
-    }
+function MemoList(props) {
     return (
         <article>
             <h2>Memos</h2>
-            <table className="App-table">
-                <tbody>
-                {rows}
-                </tbody>
-            </table>
+            <TableContainer component={Paper}>
+                <Table sx={{minWidth: 650}} size="big" aria-label="simple table">
+                    <TableHead>
+                        <TableRow>
+                            <TableCell>Memo</TableCell>
+                        </TableRow>
+                    </TableHead>
+                    <TableBody>
+                        {props.memos.map((row) => (
+
+                            <TableRow
+                                key={row.memo}
+                                sx={{'&:last-child td, &:last-child th': {border: 0}}}
+                            >
+                                <TableCell component="th" scope="row" onClick={() => {
+                                    props.onClick(row.memo);
+                                }}>
+                                    {row.memo}
+                                </TableCell>
+                            </TableRow>
+                        ))}
+                    </TableBody>
+                </Table>
+            </TableContainer>
         </article>
     );
 }
@@ -232,8 +259,18 @@ function Create(props) {
                 if (newMemoValue !== '')
                     props.onCreate(newMemoValue);
             }}>
-                <TextField id="outlined-basic" label="Memo" variant="outlined" name="memo" size="40"
-                           onMouseEnter={event => event.target}/><p/>
+                <TextField
+                    id="standard-multiline-static"
+                    name="memo"
+                    label="Memo"
+                    multiline
+                    rows={4}
+                    fullWidth
+                    defaultValue=""
+                    variant="standard"
+                    onMouseEnter={event => event.target}
+                />
+                <p/>
                 <Button variant="contained" type="submit">Create</Button>
             </form>
         </article>
@@ -251,13 +288,21 @@ function Update(props) {
                 if (newMemoValue !== '')
                     props.onUpdate(newMemoValue);
             }}>
-                <TextField id="outlined-basic" label="Memo" variant="outlined" name="memo" size="40"
-                           value={orgMemo}
-                           onChange={event => setOrgMemo(event.target.value)} onMouseEnter={event => event.target}/><p/>
+                <TextField
+                    id="standard-multiline-static"
+                    name="memo"
+                    label="Memo"
+                    multiline
+                    rows={4}
+                    fullWidth
+                    value={orgMemo}
+                    variant="standard"
+                    onChange={event => setOrgMemo(event.target.value)}
+                    onMouseEnter={event => event.target}
+                />
                 <Button variant="contained" type="submit">Update</Button>
             </form>
             <p/>
-
         </article>
     );
 }
