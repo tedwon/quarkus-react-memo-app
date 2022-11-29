@@ -31,9 +31,9 @@ function App() {
     const [memos, setMemos] = useState([]);
 
     // For Update
-    // Original Memo
-    const [orgMemo, setOrgMemo] = useState('');
+    const [memo, setMemo] = useState('');
 
+    // Retrieve All Memos from Server-side
     // Note: the empty deps array [] means
     // this useEffect will run once
     // similar to componentDidMount()
@@ -59,13 +59,13 @@ function App() {
                 <Stack spacing={2}>
                     <Item>
                         <Head></Head>
-                        <CreateUpdateInput mode={mode} orgMemo={orgMemo}
+                        <CreateUpdateInput mode={mode} memo={memo}
                                            onClick={(retrievedMemos, newMode) => {
                                                if (retrievedMemos !== null)
                                                    setMemos(retrievedMemos);
                                                setMode(newMode);
                                            }}></CreateUpdateInput>
-                        <DeleteButton mode={mode} orgMemo={orgMemo}
+                        <DeleteButton mode={mode} memo={memo}
                                       onClick={(retrievedMemos, newMode) => {
                                           setMemos(retrievedMemos);
                                           setMode(newMode);
@@ -73,7 +73,7 @@ function App() {
                     </Item>
                     <Item>
                         <MemoTable memos={memos} onClick={memo => {
-                            setOrgMemo(memo);
+                            setMemo(memo);
                             setMode('UPDATE');
                         }}></MemoTable>
                     </Item>
@@ -117,7 +117,7 @@ function CreateUpdateInput(props) {
                 )
         }}></Create>
     } else if (mode === 'UPDATE') {
-        const orgMemo = props.orgMemo;
+        const orgMemo = props.memo;
         createUpdateContext = <Update orgMemo={orgMemo} onUpdate={(newMemoValue, mode) => {
             const _newMemo = {memo: newMemoValue};
 
@@ -165,7 +165,7 @@ function DeleteButton(props) {
     let memoDeleteButton = null;
 
     if (mode === 'UPDATE') {
-        const orgMemo = props.orgMemo;
+        const orgMemo = props.memo;
 
         memoDeleteButton = (
             <Button variant="contained" type="submit" onClick={() => {
