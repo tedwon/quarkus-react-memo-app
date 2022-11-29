@@ -30,7 +30,7 @@ function App() {
     // Data
     const [memos, setMemos] = useState([]);
 
-    // For Update
+    // For UpdateMemo
     const [memo, setMemo] = useState('');
 
     // Retrieve All Memos from Server-side
@@ -58,7 +58,7 @@ function App() {
             <Box sx={{width: '100%'}}>
                 <Stack spacing={2}>
                     <Item>
-                        <Head></Head>
+                        <Head/>
                         <CreateUpdateInput mode={mode} memo={memo}
                                            onClick={(retrievedMemos, newMode) => {
                                                if (retrievedMemos !== null)
@@ -94,16 +94,16 @@ function Head() {
 }
 
 function CreateUpdateInput(props) {
-    let createUpdateContext = null;
+    let createUpdateInput = null;
     let mode = props.mode;
 
     if (mode === 'CREATE') {
-        createUpdateContext = <Create mode={props.mode} onCreate={newMemoValue => {
-            const _newMemo = {memo: newMemoValue};
+        createUpdateInput = <CreateMemo mode={props.mode} onCreate={newMemoStr => {
+            const newMemo = {memo: newMemoStr};
             const requestOptions = {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify(_newMemo)
+                body: JSON.stringify(newMemo)
             };
             fetch("/memo", requestOptions)
                 .then(res => res.json())
@@ -115,11 +115,11 @@ function CreateUpdateInput(props) {
                         console.log(error);
                     }
                 )
-        }}></Create>
+        }}></CreateMemo>
     } else if (mode === 'UPDATE') {
-        const orgMemo = props.memo;
-        createUpdateContext = <Update orgMemo={orgMemo} onUpdate={(newMemoValue, mode) => {
-            const _newMemo = {memo: newMemoValue};
+        const memo = props.memo;
+        createUpdateInput = <UpdateMemo memo={memo} onUpdate={(newMemoStr, mode) => {
+            const newMemo = {memo: newMemoStr};
 
             if (mode === 'CREATE') {
                 props.onClick(null, mode)
@@ -127,18 +127,18 @@ function CreateUpdateInput(props) {
             }
 
             // Check if contains
-            fetch("/memo/contains/" + newMemoValue,)
+            fetch("/memo/contains/" + newMemoStr,)
                 .then(res => res.json())
                 .then(
                     result => {
-                        // Update only if data changed
+                        // UpdateMemo only if data changed
                         if (!result) {
                             const requestOptions = {
                                 method: 'POST',
                                 headers: {'Content-Type': 'application/json'},
-                                body: JSON.stringify(_newMemo)
+                                body: JSON.stringify(newMemo)
                             };
-                            fetch("/memo/update/" + orgMemo, requestOptions)
+                            fetch("/memo/update/" + memo, requestOptions)
                                 .then(res => res.json())
                                 .then(
                                     result => {
@@ -154,30 +154,29 @@ function CreateUpdateInput(props) {
                         console.log(error);
                     }
                 )
-        }}></Update>
+        }}></UpdateMemo>
     }
 
-    return createUpdateContext;
+    return createUpdateInput;
 }
 
 function DeleteButton(props) {
     let mode = props.mode;
-    let memoDeleteButton = null;
+    let deleteButton = null;
 
     if (mode === 'UPDATE') {
-        const orgMemo = props.memo;
+        const memoStr = props.memo;
 
-        memoDeleteButton = (
+        deleteButton = (
             <Button variant="contained" type="submit" onClick={() => {
-                const memo = {memo: orgMemo};
+                const memo = {memo: memoStr};
 
                 // Remove
-                const deleteRequestOptions = {
+                fetch("/memo", {
                     method: 'DELETE',
                     headers: {'Content-Type': 'application/json'},
                     body: JSON.stringify(memo)
-                };
-                fetch("/memo", deleteRequestOptions)
+                })
                     .then(res => res.json())
                     .then(
                         result => {
@@ -190,10 +189,10 @@ function DeleteButton(props) {
             }}>Delete</Button>
         );
     }
-    return memoDeleteButton;
+    return deleteButton;
 }
 
-function Create(props) {
+function CreateMemo(props) {
     return <article>
         <h2>Create Memo</h2>
         <form onSubmit={event => {
@@ -221,18 +220,18 @@ function Create(props) {
     </article>
 }
 
-function Update(props) {
+function UpdateMemo(props) {
     const [mode, setMode] = useState(null);
-    const [orgMemo, setOrgMemo] = useState(props.orgMemo);
+    const [memo, setMemo] = useState(props.memo);
 
     return (
         <article>
             <h2>Update Memo</h2>
             <form onSubmit={event => {
                 event.preventDefault();
-                const newMemoValue = event.target.memo.value;
-                if (newMemoValue !== '')
-                    props.onUpdate(newMemoValue, mode);
+                const newMemoStr = event.target.memo.value;
+                if (newMemoStr !== '')
+                    props.onUpdate(newMemoStr, mode);
             }}>
                 <TextField
                     id="standard-multiline-static"
@@ -241,9 +240,9 @@ function Update(props) {
                     multiline
                     rows={4}
                     fullWidth
-                    value={orgMemo}
+                    value={memo}
                     variant="standard"
-                    onChange={event => setOrgMemo(event.target.value)}
+                    onChange={event => setMemo(event.target.value)}
                     onMouseEnter={event => event.target}
                 />
                 <ButtonGroup variant="contained" aria-label="outlined primary button group">
@@ -261,7 +260,7 @@ function Update(props) {
 }
 
 function MemoTable(props) {
-    let memos = props.memos;
+    const memos = props.memos;
     return (
         <article>
             <h2>Memos</h2>
@@ -273,15 +272,15 @@ function MemoTable(props) {
                         </TableRow>
                     </TableHead>
                     <TableBody>
-                        {memos.map((row) => (
+                        {memos.map((memo) => (
                             <TableRow
-                                key={row.memo}
+                                key={memo.memo}
                                 sx={{'&:last-child td, &:last-child th': {border: 0}}}
                             >
                                 <TableCell component="th" scope="row" onClick={() => {
-                                    props.onClick(row.memo);
+                                    props.onClick(memo.memo);
                                 }}>
-                                    {row.memo}
+                                    {memo.memo}
                                 </TableCell>
                             </TableRow>
                         ))}
