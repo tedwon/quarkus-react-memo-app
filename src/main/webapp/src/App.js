@@ -98,7 +98,7 @@ function CreateUpdateInput(props) {
     let mode = props.mode;
 
     if (mode === 'CREATE') {
-        createUpdateInput = <CreateMemo mode={props.mode} onCreate={newMemoStr => {
+        createUpdateInput = <CreateMemo mode={mode} onCreate={newMemoStr => {
             const newMemo = {memo: newMemoStr};
             const requestOptions = {
                 method: 'POST',
