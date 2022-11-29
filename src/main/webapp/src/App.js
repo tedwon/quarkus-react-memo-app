@@ -1,10 +1,10 @@
 import './App.css';
 import {useEffect, useState} from "react";
-import produce from "immer";
 import Box from '@mui/material/Box';
 import Stack from '@mui/material/Stack';
 import {styled} from '@mui/material/styles';
 import Button from '@mui/material/Button';
+import ButtonGroup from '@mui/material/ButtonGroup';
 import TextField from '@mui/material/TextField';
 import Container from '@mui/material/Container';
 import Table from '@mui/material/Table';
@@ -30,12 +30,16 @@ function App() {
     // Data
     const [memos, setMemos] = useState([]);
 
+    // For Update
+    // Original Memo
+    const [orgMemo, setOrgMemo] = useState('');
+
     // Note: the empty deps array [] means
     // this useEffect will run once
     // similar to componentDidMount()
     // https://reactjs.org/docs/faq-ajax.html
     useEffect(() => {
-        fetch("http://localhost:8080/memo")
+        fetch("/memo")
             .then(res => res.json())
             .then(result => {
                     setMemos(result);
@@ -49,96 +53,120 @@ function App() {
             )
     }, [])
 
-    // For Update
-    // Original Memo
-    const [orgMemo, setOrgMemo] = useState(null);
+    return (
+        <Container fixed>
+            <Box sx={{width: '100%'}}>
+                <Stack spacing={2}>
+                    <Item>
+                        <Head></Head>
+                        <CreateUpdateInput mode={mode} orgMemo={orgMemo}
+                                           onClick={(retrievedMemos, newMode) => {
+                                               if (retrievedMemos !== null)
+                                                   setMemos(retrievedMemos);
+                                               setMode(newMode);
+                                           }}></CreateUpdateInput>
+                        <DeleteButton mode={mode} orgMemo={orgMemo}
+                                      onClick={(retrievedMemos, newMode) => {
+                                          setMemos(retrievedMemos);
+                                          setMode(newMode);
+                                      }}></DeleteButton>
+                    </Item>
+                    <Item>
+                        <MemoTable memos={memos} onClick={memo => {
+                            setOrgMemo(memo);
+                            setMode('UPDATE');
+                        }}></MemoTable>
+                    </Item>
+                </Stack>
+            </Box>
+        </Container>
+    );
+}
 
-    let createMenu, memoDetailBody, memoDeleteButton = null;
+export default App;
+
+function Head() {
+    return (
+        <header>
+            <h1>React Memo App on Quarkus</h1>
+        </header>
+    );
+}
+
+function CreateUpdateInput(props) {
+    let createUpdateContext = null;
+    let mode = props.mode;
 
     if (mode === 'CREATE') {
-        createMenu = null;
-        memoDetailBody = <Create onCreate={newMemoValue => {
+        createUpdateContext = <Create mode={props.mode} onCreate={newMemoValue => {
             const _newMemo = {memo: newMemoValue};
-            const copyMemos = [...memos];
             const requestOptions = {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
                 body: JSON.stringify(_newMemo)
             };
-            fetch("http://localhost:8080/memo", requestOptions)
+            fetch("/memo", requestOptions)
                 .then(res => res.json())
                 .then(
                     result => {
-                        if (result) {
-                            copyMemos.push(_newMemo);
-                            setMemos(copyMemos);
-                        }
+                        props.onClick(result, 'CREATE');
                     },
-                    // Note: it's important to handle errors here
-                    // instead of a catch() block so that we don't swallow
-                    // exceptions from actual bugs in components.
                     error => {
                         console.log(error);
                     }
                 )
-            setMode('CREATE');
         }}></Create>
     } else if (mode === 'UPDATE') {
-        createMenu = <Button variant="outlined" type="submit" onClick={event => {
-            event.preventDefault();
-            setMode('CREATE');
-        }}>Create Memo</Button>
-        memoDetailBody = <Update orgMemo={orgMemo} onUpdate={newMemoValue => {
-            const memo = {memo: orgMemo};
+        const orgMemo = props.orgMemo;
+        createUpdateContext = <Update orgMemo={orgMemo} onUpdate={(newMemoValue, mode) => {
             const _newMemo = {memo: newMemoValue};
 
-            // Remove
-            const deleteRequestOptions = {
-                method: 'DELETE',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify(memo)
-            };
-            fetch("http://localhost:8080/memo", deleteRequestOptions)
+            if (mode === 'CREATE') {
+                props.onClick(null, mode)
+                return
+            }
+
+            // Check if contains
+            fetch("/memo/contains/" + newMemoValue,)
                 .then(res => res.json())
                 .then(
-                    () => {
-                        // Add
-                        const requestOptions = {
-                            method: 'POST',
-                            headers: {'Content-Type': 'application/json'},
-                            body: JSON.stringify(_newMemo)
-                        };
-                        fetch("http://localhost:8080/memo", requestOptions)
-                            .then(res => res.json())
-                            .then(
-                                () => {
-                                    // Use Immer.js
-                                    setMemos(produce(memos, draft => {
-                                        for (let i = 0; i < memos.length; i++) {
-                                            if (draft[i].memo === orgMemo) {
-                                                draft[i] = _newMemo;
-                                                break;
-                                            }
-                                        }
-                                    }));
-                                },
-                                // Note: it's important to handle errors here
-                                // instead of a catch() block so that we don't swallow
-                                // exceptions from actual bugs in components.
-                                (error) => {
-                                    console.log(error);
-                                }
-                            )
+                    result => {
+                        // Update only if data changed
+                        if (!result) {
+                            const requestOptions = {
+                                method: 'POST',
+                                headers: {'Content-Type': 'application/json'},
+                                body: JSON.stringify(_newMemo)
+                            };
+                            fetch("/memo/update/" + orgMemo, requestOptions)
+                                .then(res => res.json())
+                                .then(
+                                    result => {
+                                        props.onClick(result, 'CREATE')
+                                    },
+                                    (error) => {
+                                        console.log(error);
+                                    }
+                                )
+                        }
                     },
-                    // Note: it's important to handle errors here
-                    // instead of a catch() block so that we don't swallow
-                    // exceptions from actual bugs in components.
                     (error) => {
                         console.log(error);
                     }
                 )
-            setMode('CREATE');
         }}></Update>
+    }
+
+    return createUpdateContext;
+}
+
+function DeleteButton(props) {
+    let mode = props.mode;
+    let memoDeleteButton = null;
+
+    if (mode === 'UPDATE') {
+        const orgMemo = props.orgMemo;
+
         memoDeleteButton = (
             <Button variant="contained" type="submit" onClick={() => {
                 const memo = {memo: orgMemo};
@@ -149,62 +177,91 @@ function App() {
                     headers: {'Content-Type': 'application/json'},
                     body: JSON.stringify(memo)
                 };
-                fetch("http://localhost:8080/memo", deleteRequestOptions)
+                fetch("/memo", deleteRequestOptions)
                     .then(res => res.json())
                     .then(
-                        () => {
-                            setMemos(produce([], draft => {
-                                for (let i = 0; i < memos.length; i++) {
-                                    if (memos[i].memo !== orgMemo) {
-                                        draft.push(memos[i])
-                                    }
-                                }
-                            }));
+                        result => {
+                            props.onClick(result, 'CREATE')
                         },
-                        // Note: it's important to handle errors here
-                        // instead of a catch() block so that we don't swallow
-                        // exceptions from actual bugs in components.
                         (error) => {
                             console.log(error);
                         }
                     )
-                setMode('CREATE');
             }}>Delete</Button>
         );
     }
+    return memoDeleteButton;
+}
+
+function Create(props) {
+    return <article>
+        <h2>Create Memo</h2>
+        <form onSubmit={event => {
+            event.preventDefault();
+            const newMemoValue = event.target.memo.value;
+            if (newMemoValue !== '') {
+                props.onCreate(newMemoValue);
+                event.target.memo.value = "";
+            }
+        }}>
+            <TextField
+                id="standard-multiline-static"
+                name="memo"
+                label="Memo"
+                multiline
+                rows={4}
+                fullWidth
+                defaultValue=""
+                variant="standard"
+                onMouseEnter={event => event.target}
+            />
+            <p/>
+            <Button variant="contained" type="submit">Create</Button>
+        </form>
+    </article>
+}
+
+function Update(props) {
+    const [mode, setMode] = useState(null);
+    const [orgMemo, setOrgMemo] = useState(props.orgMemo);
 
     return (
-        <Container fixed>
-            <Box sx={{width: '100%'}}>
-                <Stack spacing={2}>
-                    <Item>
-                        <Head></Head>
-                        {createMenu}
-                        {memoDetailBody}
-                        {memoDeleteButton}
-                    </Item>
-                    <Item>
-                        <MemoList memos={memos} onClick={(_memo) => {
-                            setOrgMemo(_memo);
-                            setMode('UPDATE');
-                        }}></MemoList>
-                    </Item>
-                </Stack>
-            </Box>
-        </Container>
-
+        <article>
+            <h2>Update Memo</h2>
+            <form onSubmit={event => {
+                event.preventDefault();
+                const newMemoValue = event.target.memo.value;
+                if (newMemoValue !== '')
+                    props.onUpdate(newMemoValue, mode);
+            }}>
+                <TextField
+                    id="standard-multiline-static"
+                    name="memo"
+                    label="Memo"
+                    multiline
+                    rows={4}
+                    fullWidth
+                    value={orgMemo}
+                    variant="standard"
+                    onChange={event => setOrgMemo(event.target.value)}
+                    onMouseEnter={event => event.target}
+                />
+                <ButtonGroup variant="contained" aria-label="outlined primary button group">
+                    <Button type="submit" onClick={() => {
+                        setMode('UPDATE');
+                    }}>Update</Button>
+                    <Button type="submit" onClick={() => {
+                        setMode('CREATE');
+                    }}>Cancel</Button>
+                </ButtonGroup>
+            </form>
+            <p/>
+        </article>
     );
 }
 
-function Head() {
-    return (
-        <header>
-            <h1>React Memo App on Quarkus</h1>
-        </header>
-    );
-}
-
-function MemoList(props) {
+function MemoTable(props) {
+    let memos = props.memos;
     return (
         <article>
             <h2>Memos</h2>
@@ -216,8 +273,7 @@ function MemoList(props) {
                         </TableRow>
                     </TableHead>
                     <TableBody>
-                        {props.memos.map((row) => (
-
+                        {memos.map((row) => (
                             <TableRow
                                 key={row.memo}
                                 sx={{'&:last-child td, &:last-child th': {border: 0}}}
@@ -235,63 +291,3 @@ function MemoList(props) {
         </article>
     );
 }
-
-function Create(props) {
-    return (
-        <article>
-            <h2>Create Memo</h2>
-            <form onSubmit={event => {
-                event.preventDefault();
-                const newMemoValue = event.target.memo.value;
-                if (newMemoValue !== '')
-                    props.onCreate(newMemoValue);
-            }}>
-                <TextField
-                    id="standard-multiline-static"
-                    name="memo"
-                    label="Memo"
-                    multiline
-                    rows={4}
-                    fullWidth
-                    defaultValue=""
-                    variant="standard"
-                    onMouseEnter={event => event.target}
-                />
-                <p/>
-                <Button variant="contained" type="submit">Create</Button>
-            </form>
-        </article>
-    );
-}
-
-function Update(props) {
-    const [orgMemo, setOrgMemo] = useState(props.orgMemo);
-    return (
-        <article>
-            <h2>Update Memo</h2>
-            <form onSubmit={event => {
-                event.preventDefault();
-                const newMemoValue = event.target.memo.value;
-                if (newMemoValue !== '')
-                    props.onUpdate(newMemoValue);
-            }}>
-                <TextField
-                    id="standard-multiline-static"
-                    name="memo"
-                    label="Memo"
-                    multiline
-                    rows={4}
-                    fullWidth
-                    value={orgMemo}
-                    variant="standard"
-                    onChange={event => setOrgMemo(event.target.value)}
-                    onMouseEnter={event => event.target}
-                />
-                <Button variant="contained" type="submit">Update</Button>
-            </form>
-            <p/>
-        </article>
-    );
-}
-
-export default App;
