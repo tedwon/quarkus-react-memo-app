@@ -116,23 +116,23 @@ function CreateUpdateInput(props) {
         }}></CreateMemo>
     } else if (mode === 'UPDATE') {
         const memo = props.memo;
-        createUpdateInput = <UpdateMemo memo={memo} onUpdate={(newMemo, mode) => {
+        createUpdateInput = <UpdateMemo memo={memo} onUpdate={(updatedMemo, mode) => {
             if (mode === 'CREATE') {
                 props.onClick(null, mode)
                 return
             }
 
-            // Check if contains
+            // Check if contains updated memo
             fetch("/memo/contains", {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify(newMemo)
+                body: JSON.stringify(updatedMemo)
             })
                 .then(res => res.json())
                 .then(
-                    result => {
-                        // Update(add) only if newMemo NOT exists which means data was changed
-                        if (!result) {
+                    containsUpdatedMemo => {
+                        // Update(add) only if updatedMemo NOT exists which means data was changed
+                        if (!containsUpdatedMemo) {
                             // Remove original memo
                             fetch("/memo", {
                                 method: 'DELETE',
@@ -146,7 +146,7 @@ function CreateUpdateInput(props) {
                                         fetch("/memo", {
                                             method: 'POST',
                                             headers: {'Content-Type': 'application/json'},
-                                            body: JSON.stringify(newMemo)
+                                            body: JSON.stringify(updatedMemo)
                                         })
                                             .then(res => res.json())
                                             .then(
@@ -240,12 +240,12 @@ function UpdateMemo(props) {
             <h2>Update Memo</h2>
             <form onSubmit={event => {
                 event.preventDefault();
-                const newTitleStr = event.target.title.value;
-                const newMemoStr = event.target.memo.value;
-                const newTagsStr = event.target.tags.value;
-                if (newTitleStr !== '') {
-                    const newMemo = {title: newTitleStr, memo: newMemoStr, tags: newTagsStr};
-                    props.onUpdate(newMemo, mode);
+                const updatedTitleStr = event.target.title.value;
+                const updatedMemoStr = event.target.memo.value;
+                const updatedTagsStr = event.target.tags.value;
+                if (updatedTitleStr !== '') {
+                    const updatedMemo = {title: updatedTitleStr, memo: updatedMemoStr, tags: updatedTagsStr};
+                    props.onUpdate(updatedMemo, mode);
                 }
             }}>
                 <TextField
