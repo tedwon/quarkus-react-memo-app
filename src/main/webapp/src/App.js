@@ -98,14 +98,12 @@ function CreateUpdateInput(props) {
     let mode = props.mode;
 
     if (mode === 'CREATE') {
-        createUpdateInput = <CreateMemo mode={mode} onCreate={newMemoStr => {
-            const newMemo = {memo: newMemoStr};
-            const requestOptions = {
+        createUpdateInput = <CreateMemo mode={mode} onCreate={newMemo => {
+            fetch("/memo", {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
                 body: JSON.stringify(newMemo)
-            };
-            fetch("/memo", requestOptions)
+            })
                 .then(res => res.json())
                 .then(
                     result => {
@@ -118,31 +116,47 @@ function CreateUpdateInput(props) {
         }}></CreateMemo>
     } else if (mode === 'UPDATE') {
         const memo = props.memo;
-        createUpdateInput = <UpdateMemo memo={memo} onUpdate={(newMemoStr, mode) => {
-            const newMemo = {memo: newMemoStr};
-
+        createUpdateInput = <UpdateMemo memo={memo} onUpdate={(newMemo, mode) => {
             if (mode === 'CREATE') {
                 props.onClick(null, mode)
                 return
             }
 
             // Check if contains
-            fetch("/memo/contains/" + newMemoStr,)
+            fetch("/memo/contains", {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify(newMemo)
+            })
                 .then(res => res.json())
                 .then(
                     result => {
-                        // UpdateMemo only if data changed
+                        // Update(add) only if newMemo NOT exists which means data was changed
                         if (!result) {
-                            const requestOptions = {
-                                method: 'POST',
+                            // Remove original memo
+                            fetch("/memo", {
+                                method: 'DELETE',
                                 headers: {'Content-Type': 'application/json'},
-                                body: JSON.stringify(newMemo)
-                            };
-                            fetch("/memo/update/" + memo, requestOptions)
+                                body: JSON.stringify(memo)
+                            })
                                 .then(res => res.json())
                                 .then(
-                                    result => {
-                                        props.onClick(result, 'CREATE')
+                                    () => {
+                                        // Add updated memo
+                                        fetch("/memo", {
+                                            method: 'POST',
+                                            headers: {'Content-Type': 'application/json'},
+                                            body: JSON.stringify(newMemo)
+                                        })
+                                            .then(res => res.json())
+                                            .then(
+                                                result => {
+                                                    props.onClick(result, 'CREATE')
+                                                },
+                                                (error) => {
+                                                    console.log(error);
+                                                }
+                                            )
                                     },
                                     (error) => {
                                         console.log(error);
@@ -160,17 +174,139 @@ function CreateUpdateInput(props) {
     return createUpdateInput;
 }
 
+function CreateMemo(props) {
+    return <article>
+        <h2>Create Memo</h2>
+        <form onSubmit={event => {
+            event.preventDefault();
+            const newTitleStr = event.target.title.value;
+            const newMemoStr = event.target.memo.value;
+            const newTagsStr = event.target.tags.value;
+            if (newTitleStr !== '') {
+                const newMemo = {title: newTitleStr, memo: newMemoStr, tags: newTagsStr};
+                props.onCreate(newMemo);
+                event.target.title.value = "";
+                event.target.memo.value = "";
+                event.target.tags.value = "";
+            }
+        }}>
+            <TextField
+                required
+                id="outlined-required"
+                name="title"
+                label="Title"
+                variant="outlined"
+                fullWidth
+                defaultValue=""
+
+                onMouseEnter={event => event.target}
+            />
+            <p/>
+            <TextField
+                id="standard-multiline-static"
+                name="memo"
+                label="Memo"
+                variant="outlined"
+                fullWidth
+                multiline
+                rows={5}
+                defaultValue=""
+                onMouseEnter={event => event.target}
+            />
+            <p/>
+            <TextField
+                id="outlined-basic"
+                name="tags"
+                label="Tags"
+                variant="outlined"
+                fullWidth
+                defaultValue=""
+                onMouseEnter={event => event.target}
+            />
+            <p/>
+            <Button variant="contained" type="submit">Create</Button>
+        </form>
+    </article>
+}
+
+function UpdateMemo(props) {
+    const [mode, setMode] = useState(null);
+    const [title, setTitle] = useState(props.memo.title);
+    const [memo, setMemo] = useState(props.memo.memo);
+    const [tags, setTags] = useState(props.memo.tags);
+
+    return (
+        <article>
+            <h2>Update Memo</h2>
+            <form onSubmit={event => {
+                event.preventDefault();
+                const newTitleStr = event.target.title.value;
+                const newMemoStr = event.target.memo.value;
+                const newTagsStr = event.target.tags.value;
+                if (newTitleStr !== '') {
+                    const newMemo = {title: newTitleStr, memo: newMemoStr, tags: newTagsStr};
+                    props.onUpdate(newMemo, mode);
+                }
+            }}>
+                <TextField
+                    required
+                    id="outlined-required"
+                    name="title"
+                    label="Required"
+                    variant="outlined"
+                    fullWidth
+                    value={title}
+                    onChange={event => setTitle(event.target.value)}
+                    onMouseEnter={event => event.target}
+                />
+                <p/>
+                <TextField
+                    id="standard-multiline-static"
+                    name="memo"
+                    label="Memo"
+                    variant="outlined"
+                    fullWidth
+                    multiline
+                    rows={5}
+                    value={memo}
+                    onChange={event => setMemo(event.target.value)}
+                    onMouseEnter={event => event.target}
+                />
+                <p/>
+                <TextField
+                    id="outlined-basic"
+                    name="tags"
+                    label="Outlined"
+                    variant="outlined"
+                    fullWidth
+                    value={tags}
+                    onChange={event => setTags(event.target.value)}
+                    onMouseEnter={event => event.target}
+                />
+                <p/>
+                <ButtonGroup variant="contained" aria-label="outlined primary button group">
+                    <Button type="submit" onClick={() => {
+                        setMode('UPDATE');
+                    }}>Update</Button>
+                    <Button type="submit" onClick={() => {
+                        setMode('CREATE');
+                    }}>Cancel</Button>
+                </ButtonGroup>
+            </form>
+            <p/>
+        </article>
+    );
+}
+
 function DeleteButton(props) {
     let mode = props.mode;
     let deleteButton = null;
 
     if (mode === 'UPDATE') {
-        const memoStr = props.memo;
+        const memo = props.memo;
 
         deleteButton = (
             <Button variant="contained" type="submit" onClick={() => {
-                const memo = {memo: memoStr};
-
                 // Remove
                 fetch("/memo", {
                     method: 'DELETE',
@@ -192,73 +328,6 @@ function DeleteButton(props) {
     return deleteButton;
 }
 
-function CreateMemo(props) {
-    return <article>
-        <h2>Create Memo</h2>
-        <form onSubmit={event => {
-            event.preventDefault();
-            const newMemoValue = event.target.memo.value;
-            if (newMemoValue !== '') {
-                props.onCreate(newMemoValue);
-                event.target.memo.value = "";
-            }
-        }}>
-            <TextField
-                id="standard-multiline-static"
-                name="memo"
-                label="Memo"
-                multiline
-                rows={4}
-                fullWidth
-                defaultValue=""
-                variant="standard"
-                onMouseEnter={event => event.target}
-            />
-            <p/>
-            <Button variant="contained" type="submit">Create</Button>
-        </form>
-    </article>
-}
-
-function UpdateMemo(props) {
-    const [mode, setMode] = useState(null);
-    const [memo, setMemo] = useState(props.memo);
-
-    return (
-        <article>
-            <h2>Update Memo</h2>
-            <form onSubmit={event => {
-                event.preventDefault();
-                const newMemoStr = event.target.memo.value;
-                if (newMemoStr !== '')
-                    props.onUpdate(newMemoStr, mode);
-            }}>
-                <TextField
-                    id="standard-multiline-static"
-                    name="memo"
-                    label="Memo"
-                    multiline
-                    rows={4}
-                    fullWidth
-                    value={memo}
-                    variant="standard"
-                    onChange={event => setMemo(event.target.value)}
-                    onMouseEnter={event => event.target}
-                />
-                <ButtonGroup variant="contained" aria-label="outlined primary button group">
-                    <Button type="submit" onClick={() => {
-                        setMode('UPDATE');
-                    }}>Update</Button>
-                    <Button type="submit" onClick={() => {
-                        setMode('CREATE');
-                    }}>Cancel</Button>
-                </ButtonGroup>
-            </form>
-            <p/>
-        </article>
-    );
-}
-
 function MemoTable(props) {
     const memos = props.memos;
     return (
@@ -268,19 +337,31 @@ function MemoTable(props) {
                 <Table sx={{minWidth: 650}} size="big" aria-label="simple table">
                     <TableHead>
                         <TableRow>
+                            <TableCell>Title</TableCell>
                             <TableCell>Memo</TableCell>
+                            <TableCell>tags</TableCell>
                         </TableRow>
                     </TableHead>
                     <TableBody>
                         {memos.map((memo) => (
                             <TableRow
-                                key={memo.memo}
+                                key={memo.title}
                                 sx={{'&:last-child td, &:last-child th': {border: 0}}}
                             >
                                 <TableCell component="th" scope="row" onClick={() => {
-                                    props.onClick(memo.memo);
+                                    props.onClick(memo);
+                                }}>
+                                    {memo.title}
+                                </TableCell>
+                                <TableCell component="th" scope="row" onClick={() => {
+                                    props.onClick(memo);
                                 }}>
                                     {memo.memo}
+                                </TableCell>
+                                <TableCell component="th" scope="row" onClick={() => {
+                                    props.onClick(memo);
+                                }}>
+                                    {memo.tags}
                                 </TableCell>
                             </TableRow>
                         ))}

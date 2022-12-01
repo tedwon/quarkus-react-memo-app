@@ -20,7 +20,7 @@ public class MemoResource {
     static final Set<Memo> memoSet = Collections.synchronizedSet(new HashSet<>());
 
     static {
-        memoSet.add(new Memo("Pick up Sara at 2:45 pm"));
+        memoSet.add(new Memo("Pick up Sara at 2:45 pm", "Go to WESS this afternoon and meet Sara at the gate", "sara,wess"));
     }
 
     @GET
@@ -28,25 +28,16 @@ public class MemoResource {
         return memoSet;
     }
 
-    @GET
-    @Path("contains/{memo}")
-    public Boolean contains(String memo) {
-        return memoSet.contains(new Memo(memo));
+    @POST
+    @Path("contains")
+    public Boolean contains(Memo memo) {
+        return memoSet.contains(memo);
     }
 
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     public Set<Memo> create(Memo memo) {
         memoSet.add(memo);
-        return memoSet;
-    }
-
-    @POST
-    @Path("update/{memo}")
-    @Consumes(MediaType.APPLICATION_JSON)
-    public Set<Memo> update(String memo, Memo newMemo) {
-        memoSet.remove(new Memo(memo));
-        memoSet.add(newMemo);
         return memoSet;
     }
 
