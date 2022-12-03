@@ -54,7 +54,7 @@ function App() {
     }, [])
 
     return (
-        <Container fixed>
+        <Container maxWidth="xl">
             <Box sx={{width: '100%'}}>
                 <Stack spacing={2}>
                     <Item>
@@ -198,7 +198,6 @@ function CreateMemo(props) {
                 variant="outlined"
                 fullWidth
                 defaultValue=""
-
                 onMouseEnter={event => event.target}
             />
             <p/>
@@ -334,12 +333,12 @@ function MemoTable(props) {
         <article>
             <h2>Memos</h2>
             <TableContainer component={Paper}>
-                <Table sx={{minWidth: 650}} size="big" aria-label="simple table">
+                <Table sx={{minWidth: 650}} size="small" aria-label="a dense table">
                     <TableHead>
                         <TableRow>
-                            <TableCell>Title</TableCell>
+                            <TableCell sx={{width: '20%'}}>Title</TableCell>
                             <TableCell>Memo</TableCell>
-                            <TableCell>tags</TableCell>
+                            <TableCell sx={{width: '10%'}}>tags</TableCell>
                         </TableRow>
                     </TableHead>
                     <TableBody>
@@ -351,17 +350,41 @@ function MemoTable(props) {
                                 <TableCell component="th" scope="row" onClick={() => {
                                     props.onClick(memo);
                                 }}>
-                                    {memo.title}
+                                    <TextField
+                                        variant="standard"
+                                        InputProps={{
+                                            readOnly: true,
+                                        }}
+                                        fullWidth
+                                        multiline
+                                        defaultValue={memo.title}
+                                    />
                                 </TableCell>
                                 <TableCell component="th" scope="row" onClick={() => {
                                     props.onClick(memo);
                                 }}>
-                                    {memo.memo}
+                                    <TextField
+                                        variant="standard"
+                                        InputProps={{
+                                            readOnly: true,
+                                        }}
+                                        fullWidth
+                                        multiline
+                                        defaultValue={memo.memo}
+                                    />
                                 </TableCell>
                                 <TableCell component="th" scope="row" onClick={() => {
                                     props.onClick(memo);
                                 }}>
-                                    {memo.tags}
+                                    <TextField
+                                        variant="standard"
+                                        InputProps={{
+                                            readOnly: true,
+                                        }}
+                                        fullWidth
+                                        multiline
+                                        defaultValue={memo.tags}
+                                    />
                                 </TableCell>
                             </TableRow>
                         ))}
