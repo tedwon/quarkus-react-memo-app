@@ -351,12 +351,13 @@ function MemoTable(props) {
                                     props.onClick(memo);
                                 }}>
                                     <TextField
-                                        variant="standard"
+                                        variant="outlined"
                                         InputProps={{
                                             readOnly: true,
                                         }}
                                         fullWidth
                                         multiline
+                                        color="secondary"
                                         defaultValue={memo.title}
                                     />
                                 </TableCell>
@@ -364,12 +365,14 @@ function MemoTable(props) {
                                     props.onClick(memo);
                                 }}>
                                     <TextField
-                                        variant="standard"
+                                        variant="filled"
                                         InputProps={{
                                             readOnly: true,
                                         }}
                                         fullWidth
                                         multiline
+                                        color="success"
+                                        focused
                                         defaultValue={memo.memo}
                                     />
                                 </TableCell>
@@ -383,6 +386,7 @@ function MemoTable(props) {
                                         }}
                                         fullWidth
                                         multiline
+                                        color="warning"
                                         defaultValue={memo.tags}
                                     />
                                 </TableCell>
