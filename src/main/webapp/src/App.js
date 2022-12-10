@@ -2,7 +2,7 @@ import './App.css';
 import {useEffect, useState} from "react";
 import Box from '@mui/material/Box';
 import Stack from '@mui/material/Stack';
-import {styled} from '@mui/material/styles';
+import {createTheme, styled} from '@mui/material/styles';
 import Button from '@mui/material/Button';
 import ButtonGroup from '@mui/material/ButtonGroup';
 import TextField from '@mui/material/TextField';
@@ -14,6 +14,7 @@ import TableContainer from '@mui/material/TableContainer';
 import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import Paper from '@mui/material/Paper';
+import { ThemeProvider } from "@mui/material/styles";
 
 const Item = styled(Paper)(({theme}) => ({
     backgroundColor: theme.palette.mode === 'dark' ? '#1A2027' : '#fff',
@@ -22,6 +23,12 @@ const Item = styled(Paper)(({theme}) => ({
     textAlign: 'left',
     color: theme.palette.text.secondary,
 }));
+
+const CustomFontTheme = createTheme({
+    typography: {
+        fontSize: 10
+    }
+});
 
 function App() {
     // Screen
@@ -54,32 +61,34 @@ function App() {
     }, [])
 
     return (
-        <Container maxWidth="xl">
-            <Box sx={{width: '100%'}}>
-                <Stack spacing={2}>
-                    <Item>
-                        <Head/>
-                        <CreateUpdateInput mode={mode} memo={memo}
-                                           onClick={(retrievedMemos, newMode) => {
-                                               if (retrievedMemos !== null)
-                                                   setMemos(retrievedMemos);
-                                               setMode(newMode);
-                                           }}></CreateUpdateInput>
-                        <DeleteButton mode={mode} memo={memo}
-                                      onClick={(retrievedMemos, newMode) => {
-                                          setMemos(retrievedMemos);
-                                          setMode(newMode);
-                                      }}></DeleteButton>
-                    </Item>
-                    <Item>
-                        <MemoTable memos={memos} onClick={memo => {
-                            setMemo(memo);
-                            setMode('UPDATE');
-                        }}></MemoTable>
-                    </Item>
-                </Stack>
-            </Box>
-        </Container>
+        <ThemeProvider theme={CustomFontTheme}>
+            <Container maxWidth="xl">
+                <Box sx={{width: '100%'}}>
+                    <Stack spacing={2}>
+                        <Item>
+                            <Head/>
+                            <CreateUpdateInput mode={mode} memo={memo}
+                                               onClick={(retrievedMemos, newMode) => {
+                                                   if (retrievedMemos !== null)
+                                                       setMemos(retrievedMemos);
+                                                   setMode(newMode);
+                                               }}></CreateUpdateInput>
+                            <DeleteButton mode={mode} memo={memo}
+                                          onClick={(retrievedMemos, newMode) => {
+                                              setMemos(retrievedMemos);
+                                              setMode(newMode);
+                                          }}></DeleteButton>
+                        </Item>
+                        <Item>
+                            <MemoTable memos={memos} onClick={memo => {
+                                setMemo(memo);
+                                setMode('UPDATE');
+                            }}></MemoTable>
+                        </Item>
+                    </Stack>
+                </Box>
+            </Container>
+        </ThemeProvider>
     );
 }
 
@@ -338,37 +347,43 @@ function MemoTable(props) {
                         <TableRow>
                             <TableCell sx={{width: '20%'}}>Title</TableCell>
                             <TableCell>Memo</TableCell>
-                            <TableCell sx={{width: '10%'}}>tags</TableCell>
+                            <TableCell sx={{width: '10%'}}>Tags</TableCell>
                         </TableRow>
                     </TableHead>
                     <TableBody>
                         {memos.map((memo) => (
                             <TableRow
                                 key={memo.title}
-                                sx={{'&:last-child td, &:last-child th': {border: 0}}}
+                                sx={{'&:last-child td, &:last-child th': {fontSize: "0.8rem", border: 0}}}
                             >
                                 <TableCell component="th" scope="row" onClick={() => {
                                     props.onClick(memo);
                                 }}>
+                                    {memo.title}
+                                    {/*<TextField*/}
+                                    {/*    variant="outlined"*/}
+                                    {/*    InputProps={{*/}
+                                    {/*        readOnly: true,*/}
+                                    {/*    }}*/}
+                                    {/*    size="small"*/}
+                                    {/*    style={{ fontSize: 0.16 }}*/}
+                                    {/*    margin="none"*/}
+                                    {/*    fullWidth*/}
+                                    {/*    multiline*/}
+                                    {/*    color="secondary"*/}
+                                    {/*    defaultValue={memo.title}*/}
+                                    {/*/>*/}
+                                </TableCell>
+                                <TableCell component="th" scope="row" onClick={() => {
+                                    props.onClick(memo);
+                                }}>
+                                    {/*{memo.memo}*/}
                                     <TextField
                                         variant="outlined"
                                         InputProps={{
                                             readOnly: true,
                                         }}
-                                        fullWidth
-                                        multiline
-                                        color="secondary"
-                                        defaultValue={memo.title}
-                                    />
-                                </TableCell>
-                                <TableCell component="th" scope="row" onClick={() => {
-                                    props.onClick(memo);
-                                }}>
-                                    <TextField
-                                        variant="filled"
-                                        InputProps={{
-                                            readOnly: true,
-                                        }}
+                                        size="small"
                                         fullWidth
                                         multiline
                                         color="success"
@@ -379,16 +394,18 @@ function MemoTable(props) {
                                 <TableCell component="th" scope="row" onClick={() => {
                                     props.onClick(memo);
                                 }}>
-                                    <TextField
-                                        variant="standard"
-                                        InputProps={{
-                                            readOnly: true,
-                                        }}
-                                        fullWidth
-                                        multiline
-                                        color="warning"
-                                        defaultValue={memo.tags}
-                                    />
+                                    {memo.tags}
+                                    {/*<TextField*/}
+                                    {/*    variant="outlined"*/}
+                                    {/*    InputProps={{*/}
+                                    {/*        readOnly: true,*/}
+                                    {/*    }}*/}
+                                    {/*    size="small"*/}
+                                    {/*    fullWidth*/}
+                                    {/*    multiline*/}
+                                    {/*    color="warning"*/}
+                                    {/*    defaultValue={memo.tags}*/}
+                                    {/*/>*/}
                                 </TableCell>
                             </TableRow>
                         ))}
