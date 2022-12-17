@@ -5,11 +5,11 @@ import java.util.Objects;
 
 public class Memo implements Serializable {
 
-    private String title;
+    public String title;
 
-    private String memo;
+    public String memo;
 
-    private String tags;
+    public String tags;
 
     public Memo() {
     }
@@ -21,30 +21,6 @@ public class Memo implements Serializable {
     public Memo(String title, String memo, String tags) {
         this.title = title;
         this.memo = memo;
-        this.tags = tags;
-    }
-
-    public String getTitle() {
-        return title;
-    }
-
-    public void setTitle(String title) {
-        this.title = title;
-    }
-
-    public String getMemo() {
-        return memo;
-    }
-
-    public void setMemo(String memo) {
-        this.memo = memo;
-    }
-
-    public String getTags() {
-        return tags;
-    }
-
-    public void setTags(String tags) {
         this.tags = tags;
     }
 
