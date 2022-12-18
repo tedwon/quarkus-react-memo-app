@@ -21,7 +21,7 @@ public class MemoResource {
     static final Set<Memo> MEMORY_DB = Collections.synchronizedSet(new HashSet<>());
 
     static {
-        MEMORY_DB.add(new Memo("Pick up Sara", "Go to WESS this afternoon at 2:45 pm and meet Sara at the gate", "brisbane,family"));
+        MEMORY_DB.add(new Memo("Pick up Sara\n\nGo to WESS this afternoon at 2:45 pm and meet Sara at the gate", "brisbane,family"));
     }
 
     @GET
@@ -41,8 +41,7 @@ public class MemoResource {
         final var wordToUpperCase = searchKeyword.toUpperCase();
         Set<Memo> resultNotes = Collections.synchronizedSet(new HashSet<>());
         MEMORY_DB.stream().forEach(memo -> {
-            if (memo != null && (memo.title.toUpperCase().contains(wordToUpperCase)
-                    || memo.memo.toUpperCase().contains(wordToUpperCase)
+            if (memo != null && (memo.memo.toUpperCase().contains(wordToUpperCase)
                     || memo.tags.toUpperCase().contains(wordToUpperCase))
             ) {
                 resultNotes.add(memo);
