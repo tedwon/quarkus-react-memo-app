@@ -1,4 +1,4 @@
-package sara.tedwon.models;
+package sara.won.models;
 
 import java.io.Serializable;
 import java.util.Objects;

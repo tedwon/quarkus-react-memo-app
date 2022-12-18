@@ -1,4 +1,4 @@
-package sara.tedwon;
+package sara.won;
 
 import io.quarkus.test.junit.QuarkusIntegrationTest;
 
